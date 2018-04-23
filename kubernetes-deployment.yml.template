@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ta-flight
+  namespace: travel-agency
+  labels:
+    run: ta-flight
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: ta-flight
+    spec:
+      containers:
+      - image: bluezd/flight:latest 
+        #imagePullPolicy: IfNotPresent 
+        imagePullPolicy: Always 
+        name: ta-flight
+        ports:
+        - containerPort: 8001
+          protocol: TCP
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ta-flight-svc
+  namespace: travel-agency
+spec:
+  selector:
+    run: ta-flight
+  ports:
+    - port: 9002
+      targetPort: 8001
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ta-flight-ing
+  namespace: travel-agency
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    ingress.kubernetes.io/add-base-url: 'true'
+    #ingress.kubernetes.io/rewrite-target: /
+    #ingress.kubernetes.io/app-root: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /flights
+        backend:
+          serviceName: ta-flight-svc
+          servicePort: 9002

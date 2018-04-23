@@ -1,0 +1,87 @@
+box:
+  id: golang
+  ports:
+    - "8001"
+build:
+  steps:
+    - script:
+        name: install go libraries
+        code: |
+                go get github.com/gorilla/context
+                go get github.com/gorilla/mux 
+                go get github.com/rs/cors 
+    - script:
+        name: check
+        code: |
+            pwd
+            ls -l /pipeline/source/
+            env
+            go version
+
+push-to-releases:
+  steps:
+    # Push to public docker repo Container Registry (CR)
+    - internal/docker-push:
+        tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
+        cmd: go run /pipeline/source/main.go
+
+deploy-to-oke:
+  box:
+        id: alpine
+        cmd: /bin/sh
+  steps:
+    - bash-template
+    
+    - script:
+        name: "Visualise Kubernetes config"
+        code: cat kubernetes-deployment.yml
+    
+    - kubectl:
+        name: delete namespace
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: delete namespace $WERCKER_APPLICATION_OWNER_NAME --ignore-not-found=true
+        
+    - script:
+        name: wait to delete namespace
+        code: sleep 30
+        
+    - kubectl:
+        name: create namespace    
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: create namespace $WERCKER_APPLICATION_OWNER_NAME
+        
+    - kubectl:
+        name: create OCR secret
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: create secret docker-registry wrelease --docker-server=wcr.io --docker-username=$WERCKER_APPLICATION_OWNER_NAME --docker-password=$KUBERNETES_TOKEN --docker-email=${WERCKER_APPLICATION_OWNER_NAME}@mail.com --namespace=$WERCKER_APPLICATION_OWNER_NAME
+        
+    - kubectl:
+        name: create deplyoment
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: create -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
+
+    - script:
+        name: "Visualise Ingress config"
+        code: cat ingress.yml
+
+    - kubectl:
+        name: create Ingress configuration
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: create -f $WERCKER_ROOT/ingress.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
+
+    - kubectl:
+        name: get LoadBalancer public IP address
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: get svc -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip}' --all-namespaces
