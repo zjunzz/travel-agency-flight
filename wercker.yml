@@ -15,7 +15,6 @@ build:
         code: |
             pwd
             ls -l /pipeline/source/
-            env
             go version
 
 push-to-releases:
@@ -59,7 +58,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: create secret docker-registry wrelease --docker-server=wcr.io --docker-username=$WERCKER_APPLICATION_OWNER_NAME --docker-password=$KUBERNETES_TOKEN --docker-email=${WERCKER_APPLICATION_OWNER_NAME}@mail.com --namespace=$WERCKER_APPLICATION_OWNER_NAME
+        command: create secret docker-registry wrelease --docker-server=wcr.io --docker-username=$WERCKER_APPLICATION_OWNER_NAME --docker-password=$WERCKER_TOKEN --docker-email=${WERCKER_APPLICATION_OWNER_NAME}@mail.com --namespace=$WERCKER_APPLICATION_OWNER_NAME
         
     - kubectl:
         name: create deplyoment
@@ -67,21 +66,3 @@ deploy-to-oke:
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
         command: create -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
-
-    - script:
-        name: "Visualise Ingress config"
-        code: cat ingress.yml
-
-    - kubectl:
-        name: create Ingress configuration
-        server: $KUBERNETES_MASTER
-        token: $KUBERNETES_TOKEN
-        insecure-skip-tls-verify: true
-        command: create -f $WERCKER_ROOT/ingress.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
-
-    - kubectl:
-        name: get LoadBalancer public IP address
-        server: $KUBERNETES_MASTER
-        token: $KUBERNETES_TOKEN
-        insecure-skip-tls-verify: true
-        command: get svc -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip}' --all-namespaces
