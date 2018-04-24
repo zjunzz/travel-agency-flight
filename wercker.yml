@@ -7,6 +7,10 @@ build:
     - script:
         name: install go libraries
         code: |
+                # Set GOPATH
+                export GOPATH="/pipeline/source/"
+                export PATH="$PATH:$GOPATH/bin"
+
                 go get github.com/gorilla/context
                 go get github.com/gorilla/mux 
                 go get github.com/rs/cors 
@@ -15,6 +19,7 @@ build:
         code: |
             pwd
             ls -l /pipeline/source/
+            ls -l /pipeline/source/src/github.com
             go version
 
 push-to-releases:
