@@ -17,7 +17,7 @@ spec:
         run: ta-flight
     spec:
       containers:
-      - image: bluezd/flight:latest 
+      - image: wcr.io/$WERCKER_APPLICATION_OWNER_NAME/$WERCKER_APPLICATION_NAME:$WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
         #imagePullPolicy: IfNotPresent 
         imagePullPolicy: Always 
         name: ta-flight
