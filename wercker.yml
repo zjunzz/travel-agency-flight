@@ -1,7 +1,5 @@
 box:
   id: golang
-  ports:
-    - "8001"
 build:
   steps:
     - script:
@@ -14,12 +12,14 @@ build:
                 go get github.com/gorilla/context
                 go get github.com/gorilla/mux 
                 go get github.com/rs/cors 
+
+                cd /pipeline/source/
+                go build -o GoRun /pipeline/source/main.go
     - script:
         name: check
         code: |
             pwd
             ls -l /pipeline/source/
-            ls -l /pipeline/source/src/github.com
             go version
 
 push-to-releases:
@@ -27,7 +27,8 @@ push-to-releases:
     # Push to public docker repo Container Registry (CR)
     - internal/docker-push:
         tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
-        cmd: go run /pipeline/source/main.go
+        cmd: /pipeline/source/GoRun
+        ports: "8001"
 
 deploy-to-oke:
   box:
