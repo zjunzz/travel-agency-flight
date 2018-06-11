@@ -24,11 +24,14 @@ build:
 
 push-to-releases:
   steps:
-    # Push to public docker repo Container Registry (CR)
+    # Push to OCI Registry
     - internal/docker-push:
         tag: $WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
         cmd: /pipeline/source/GoRun
         ports: "8001"
+        username: $OCI_USERNAME
+        password: $OCI_PASSWORD
+        registry: $OCI_REGISTRY
 
 deploy-to-oke:
   box:
