@@ -1,0 +1,21 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ta-flight-vs
+  namespace: travel-agency-flight
+spec:
+  hosts:
+  - "*"
+  gateways:
+    - ta-flight-gateway
+  http:
+    - match:
+      - uri:
+          exact: /flights
+      route:
+      - destination:
+          host: ta-flight-svc
+          port:
+            number: 9001
+          subset: v1
