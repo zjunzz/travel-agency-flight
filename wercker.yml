@@ -50,7 +50,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: delete -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$APP_FLIGHT_NAMESPACE --ignore-not-found=false
+        command: delete -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$APP_FLIGHT_NAMESPACE --ignore-not-found=true
         
         #- kubectl:
         #    name: create OCR secret
