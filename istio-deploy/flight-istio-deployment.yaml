@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ta-flight-v1
+  namespace: travel-agency-flight
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ta-flight
+        version: v1
+    spec:
+      containers:
+      - name: ta-flight
+        image: iad.ocir.io/mbtservices1/travel-agency-flight:v1 
+        imagePullPolicy: Always 
+        ports:
+        - containerPort: 8001
+      imagePullSecrets:
+        - name: ocirsecret
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ta-flight-v2
+  namespace: travel-agency-flight
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ta-flight
+        version: v2
+    spec:
+      containers:
+      - name: ta-flight
+        image: iad.ocir.io/mbtservices1/travel-agency-flight:v2 
+        imagePullPolicy: Always 
+        ports:
+        - containerPort: 8001
+      imagePullSecrets:
+        - name: ocirsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ta-flight-svc
+  namespace: travel-agency-flight
+  labels:
+    app: ta-flight
+spec:
+  ports:
+    - port: 9001
+      targetPort: 8001
+      name: http
+  selector:
+    app: ta-flight
