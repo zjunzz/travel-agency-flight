@@ -25,6 +25,8 @@ spec:
         - containerPort: 8001
           protocol: TCP
       restartPolicy: Always
+      imagePullSecrets:
+        - name: ocirsecret
 ---
 apiVersion: v1
 kind: Service
