@@ -18,6 +18,7 @@ spec:
     spec:
       containers:
       - image: wcr.io/$WERCKER_APPLICATION_OWNER_NAME/$WERCKER_APPLICATION_NAME:$WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
+      - image: $OKE_REPOSITORY/$WERCKER_APPLICATION_NAME:$WERCKER_GIT_BRANCH-$WERCKER_GIT_COMMIT
         #imagePullPolicy: IfNotPresent 
         imagePullPolicy: Always 
         name: ta-flight
@@ -29,7 +30,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ta-flight-svc
+  name: ta-flight
 spec:
   selector:
     run: ta-flight
@@ -37,21 +38,3 @@ spec:
     - port: 9002
       targetPort: 8001
   type: ClusterIP
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: ta-flight-ing
-  annotations:
-    kubernetes.io/ingress.class: 'nginx'
-    ingress.kubernetes.io/add-base-url: 'true'
-    #ingress.kubernetes.io/rewrite-target: /
-    #ingress.kubernetes.io/app-root: /
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /flights
-        backend:
-          serviceName: ta-flight-svc
-          servicePort: 9002
