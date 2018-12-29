@@ -50,14 +50,14 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: delete -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$APP_FLIGHT_NAMESPACE
+        command: delete -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$APP_FLIGHT_NAMESPACE --ignore-not-found=false
         
-    - kubectl:
-        name: create OCR secret
-        server: $KUBERNETES_MASTER
-        token: $KUBERNETES_TOKEN
-        insecure-skip-tls-verify: true
-        command: create secret docker-registry ocirsecret --docker-server=iad.ocir.io --docker-username=$OKE_USERNAME --docker-password=$OKE_PASSWORD --docker-email=${WERCKER_APPLICATION_OWNER_NAME}@mail.com --namespace=$APP_FLIGHT_NAMESPACE
+        #- kubectl:
+        #    name: create OCR secret
+        #    server: $KUBERNETES_MASTER
+        #    token: $KUBERNETES_TOKEN
+        #    insecure-skip-tls-verify: true
+        #    command: create secret docker-registry ocirsecret --docker-server=iad.ocir.io --docker-username=$OKE_USERNAME --docker-password=$OKE_PASSWORD --docker-email=${WERCKER_APPLICATION_OWNER_NAME}@mail.com --namespace=$APP_FLIGHT_NAMESPACE
         
     - kubectl:
         name: create deplyoment
